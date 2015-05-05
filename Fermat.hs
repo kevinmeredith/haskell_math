@@ -1,7 +1,39 @@
+module Fermat where
+
+import Data.Set
+
+factors :: Int -> Maybe (Set Int)
+factors = fmap fromList . factors'
+
+factors' :: Int -> Maybe [Int]
+factors' x = do 
+    _   <- odd' x
+    res <- fermat x
+    if (idAndItself x res) then (Just (tupleToList res)) else (tupleToMaybeList res (factors' (fst res)) (factors' (snd res)) )
+
+tupleToList :: (a, a) -> [a]
+tupleToList (x, y) = [x, y]
+
+tupleToMaybeList :: (a, a) -> Maybe [a] -> Maybe [a] -> Maybe [a]
+tupleToMaybeList (a, b) cs ds = do
+	x  <- return a
+	y  <- return b
+	xs <- cs
+	ys <- ds
+	return ((x : y : xs) ++ ys)
+
+idAndItself :: (Eq a , Num a) => a -> (a, a) -> Bool
+idAndItself a (x, y) = x == 1 && y == a || y == 1 && x == a
+
+-- Only odd?
+-- TODO: see #1 from http://math.stackexchange.com/questions/1267465/simple-fermat-factorization-example/1267467#comment2574629_1267467
 fermat :: Int -> Maybe (Int, Int)
-fermat n = go $ ceiling $ sqrt (fromIntegral n)
+fermat n = odd' n >> (go $ ceiling $ sqrt (fromIntegral n))	
    where go a = case (try n a) of j @ (Just _) -> j
                                   Nothing      -> go (a + 1) 
+
+odd' :: Int -> Maybe Int
+odd' x = if (odd x) then Just x else Nothing
 
 try :: Int -> Int -> Maybe (Int, Int)
 try n a = fmap (\b -> ((a + b), (a - b))) result
