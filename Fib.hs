@@ -3,7 +3,9 @@ module Fib where
 import Data.List
 
 fib :: Int -> Maybe Int
-fib n = (fmap (snd . fst)) $ find (\(_,i) -> n == i) (zip res [0..])
+fib n 
+ | n < 0     = Nothing
+ | otherwise = (fmap (snd . fst)) $ find (\(_,i) -> n == i) (zip res [0..])
 
 res :: [(Int, Int)]
 res = iterate f (0,1)
